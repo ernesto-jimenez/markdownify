@@ -12,8 +12,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-// MarkdownifyReader takes a io.Reader with HTML and returns the text in Markdown
-func MarkdownifyReader(r io.Reader) (string, error) {
+// ConvertReader takes a io.Reader with HTML and returns the text in Markdown
+func ConvertReader(r io.Reader) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
 		return "", err

@@ -15,7 +15,7 @@ func TestMarkdownifyReader(t *testing.T) {
 	file, err := os.Open("testdata/markdown.html")
 	require.NoError(t, err)
 
-	actual, err := MarkdownifyReader(file)
+	actual, err := ConvertReader(file)
 	require.NoError(t, err)
 
 	md, err := ioutil.ReadFile("testdata/markdown_reader.md")
@@ -26,7 +26,7 @@ func TestMarkdownifyReader(t *testing.T) {
 }
 
 func TestMarkdownifyEmptyString(t *testing.T) {
-	actual, err := MarkdownifyReader(strings.NewReader(""))
+	actual, err := ConvertReader(strings.NewReader(""))
 	require.NoError(t, err)
 
 	expected := ""
@@ -37,7 +37,7 @@ func TestMarkdownifyEmptyString(t *testing.T) {
 func TestMarkdownifyBrAsLastChild(t *testing.T) {
 	str := "<span>content <br /></span>"
 
-	actual, err := MarkdownifyReader(strings.NewReader(str))
+	actual, err := ConvertReader(strings.NewReader(str))
 	require.NoError(t, err)
 
 	expected := "content"
