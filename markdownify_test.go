@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/pmezard/go-difflib/difflib"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,9 +22,7 @@ func TestMarkdownifyReader(t *testing.T) {
 	require.NoError(t, err)
 	expected := strings.TrimSpace(string(md))
 
-	if actual != expected {
-		t.Fatalf("Expected: %#v\n\tGot: %#v", expected, actual)
-	}
+	assertEqual(t, expected, actual)
 }
 
 func TestMarkdownifyEmptyString(t *testing.T) {
@@ -32,9 +31,7 @@ func TestMarkdownifyEmptyString(t *testing.T) {
 
 	expected := ""
 
-	if actual != expected {
-		t.Fatalf("Expected: %#v\n\tGot: %#v", expected, actual)
-	}
+	assertEqual(t, expected, actual)
 }
 
 func TestMarkdownifyBrAsLastChild(t *testing.T) {
@@ -45,9 +42,7 @@ func TestMarkdownifyBrAsLastChild(t *testing.T) {
 
 	expected := "content"
 
-	if actual != expected {
-		t.Fatalf("Expected: %#v\n\tGot: %#v", expected, actual)
-	}
+	assertEqual(t, expected, actual)
 }
 
 func TestMarkdownConvert(t *testing.T) {
@@ -63,7 +58,21 @@ func TestMarkdownConvert(t *testing.T) {
 	require.NoError(t, err)
 	expected := strings.TrimSpace(string(md))
 
-	if actual != expected {
-		t.Fatalf("Expected: %#v\n\tGot: %#v", expected, actual)
+	assertEqual(t, expected, actual)
+}
+
+func assertEqual(t *testing.T, expected, actual string) {
+	if actual == expected {
+		return
 	}
+	diff, _ := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
+		A:        difflib.SplitLines(expected),
+		B:        difflib.SplitLines(actual),
+		FromFile: "Expected",
+		FromDate: "",
+		ToFile:   "Actual",
+		ToDate:   "",
+		Context:  1,
+	})
+	t.Fatalf("\n\tExpected: %#v\n\tReceived: %#v\n%s", expected, actual, diff)
 }

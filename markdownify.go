@@ -29,7 +29,7 @@ func markdownify(s *goquery.Selection) string {
 	for _, n := range s.Nodes {
 		buf.WriteString(getNodeText(n))
 	}
-	return strings.TrimSpace(buf.String())
+	return tooManyNLRetexp.ReplaceAllString(strings.TrimFunc(buf.String(), unicode.IsSpace), "\n\n")
 }
 
 // Get the specified node's text content.
@@ -52,13 +52,7 @@ func getNodeText(node *html.Node) string {
 	}
 	// change BRs to spaces unless it has two in which case we add extra
 	if node.Data == "br" {
-		if node.NextSibling != nil && node.NextSibling.Data == "br" {
-			return "\n\n"
-		}
-		if node.PrevSibling != nil && node.PrevSibling.Data == "br" {
-			return ""
-		}
-		return " "
+		return "\n"
 	}
 	if node.FirstChild == nil {
 		return ""
@@ -81,6 +75,19 @@ func getNodeText(node *html.Node) string {
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		buf.WriteString(getNodeText(c))
 	}
+	if isQuote(node) {
+		str := strings.TrimSpace(buf.String())
+		lines := strings.Split(str, "\n")
+		for i, line := range lines {
+			txt := strings.TrimFunc(line, unicode.IsSpace)
+			if txt != "" {
+				lines[i] = "> " + txt
+			} else {
+				lines[i] = ">" + txt
+			}
+		}
+		return strings.Join(lines, "\n") + "\n\n"
+	}
 	if isBlock(node) {
 		buf.WriteString("\n\n")
 	}
@@ -88,7 +95,15 @@ func getNodeText(node *html.Node) string {
 }
 
 func isBlock(node *html.Node) bool {
-	return node != nil && (isParagraph(node) || isHeader(node))
+	return node != nil && (node.Data == "div" || isParagraph(node) || isHeader(node) || isQuote(node) || isList(node))
+}
+
+func isQuote(node *html.Node) bool {
+	return node != nil && node.Data == "blockquote"
+}
+
+func isList(node *html.Node) bool {
+	return node != nil && node.Data == "ul"
 }
 
 func isParagraph(node *html.Node) bool {
@@ -115,8 +130,12 @@ func getAttributeValue(attrName string, n *html.Node) (val string, exists bool) 
 	return
 }
 
+var (
+	spaceRegexp     = regexp.MustCompile("[[:space:]]+")
+	tooManyNLRetexp = regexp.MustCompile("\n{3,}")
+)
+
 func normalizeWhitespace(str string) string {
-	exp := regexp.MustCompile("[[:space:]]+")
-	str = exp.ReplaceAllString(str, " ")
+	str = spaceRegexp.ReplaceAllString(str, " ")
 	return str
 }
