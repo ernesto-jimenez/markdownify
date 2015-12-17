@@ -25,6 +25,8 @@ between quotes
 >
 > Quote paragraph 2
 
+unordered list
+
 * List item 1
 * List item 2
 * List item 3
@@ -36,6 +38,20 @@ between quotes
     LI 3.3 paragraph 2
 * List item 4
 * ##### Header list item 5
+
+ordered list
+
+1. Ordered item 1
+1. Ordered item 2
+1. Ordered item 3
+
+   1. OI 3.1
+   1. OI 3.2
+   1. OI 3.3 paragraph 1
+
+      OI 3.3 paragraph 2
+1. Ordered item 4
+1. ##### Header ordered item 5
 
 # This doesn't appear
 

@@ -94,11 +94,17 @@ func getNodeText(node *html.Node, indentation string) string {
 		buf.WriteString("\n\n")
 	}
 	if node.Data == "li" {
-		txt := "* " + strings.TrimFunc(indentText(buf.String(), "  "), unicode.IsSpace)
+		marks := "* "
+		scope := "  "
+		if node.Parent.Data == "ol" {
+			marks = "1. "
+			scope = "   "
+		}
+		txt := marks + strings.TrimFunc(indentText(buf.String(), scope), unicode.IsSpace)
 		return txt + "\n"
 	}
-	if node.Data == "ul" {
-		return indentText(strings.TrimFunc(buf.String(), unicode.IsSpace), indentation)
+	if isList(node) {
+		return indentText(strings.TrimFunc(buf.String(), unicode.IsSpace), indentation) + "\n\n"
 	}
 	return indentText(buf.String(), indentation)
 }
@@ -123,7 +129,7 @@ func isQuote(node *html.Node) bool {
 }
 
 func isList(node *html.Node) bool {
-	return node != nil && node.Data == "ul"
+	return node != nil && (node.Data == "ul" || node.Data == "ol")
 }
 
 func isParagraph(node *html.Node) bool {
